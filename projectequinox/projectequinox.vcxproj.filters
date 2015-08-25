@@ -43,6 +43,12 @@
     <Filter Include="Source Files\UI">
       <UniqueIdentifier>{b63e8fc4-b7a6-46b6-b3e7-c550d1d15e08}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Terragen">
+      <UniqueIdentifier>{6732a3d9-ed1a-4eca-bc6d-3b3f5bb5c41c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Terragen">
+      <UniqueIdentifier>{b49183ff-f4bc-4383-aedd-9149bb14a344}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\ProjectEquinox.cpp">
@@ -72,6 +78,15 @@
     <ClCompile Include="Graphics\Font.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="Terragen\PerlinNoise.cpp">
+      <Filter>Source Files\Terragen</Filter>
+    </ClCompile>
+    <ClCompile Include="Terragen\Terrain.cpp">
+      <Filter>Source Files\Terragen</Filter>
+    </ClCompile>
+    <ClCompile Include="Terragen\Graphic.cpp">
+      <Filter>Source Files\Terragen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\ProjectEquinox.h">
@@ -100,6 +115,15 @@
     </ClInclude>
     <ClInclude Include="Graphics\Font.h">
       <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Terragen\PerlinNoise.h">
+      <Filter>Header Files\Terragen</Filter>
+    </ClInclude>
+    <ClInclude Include="Terragen\Terrain.h">
+      <Filter>Header Files\Terragen</Filter>
+    </ClInclude>
+    <ClInclude Include="Terragen\Graphic.h">
+      <Filter>Header Files\Terragen</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

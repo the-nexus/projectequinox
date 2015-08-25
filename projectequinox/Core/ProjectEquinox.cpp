@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string>
 #include "GL/glew.h"
-#include "GL/glut.h"
+#include "GL/freeglut.h"
 #include "ProjectEquinox.h"
 #include "ResourceInitializer.h"
 #include "../IO/FontManager.h"
@@ -68,6 +68,7 @@ void ProjectEquinox::initializeWindow(int argc, char** argv){
 		glutMouseFunc(mouseClickEvent);
 		glutPassiveMotionFunc(mouseMovementEvent);
 		glutMotionFunc(mouseMovementEvent);
+		glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
 
 		//Keyboard input
 		glutKeyboardFunc(keyDownEvent);
@@ -88,6 +89,16 @@ void ProjectEquinox::initializeWindow(int argc, char** argv){
 }
 
 void ProjectEquinox::release(){
+	delete graphic;
+	cout << "Application terminated" << endl;
+	cout << "Enter a seed: ";
+	int seed;
+	cin >> seed;
+
+	srand(seed);
+	for (int i = 0; i < 10; i++)
+		cout << (i + 1) << ":\t"<< rand() << endl;
+	cin >> seed;
 }
 
 void ProjectEquinox::refreshWindow(){
@@ -331,6 +342,10 @@ void ProjectEquinox::initialize(){
 	//UI
 	lblFps = new TextLabel(FontManager::getInstance()->getFont(0), 16.0, "FPS: XX", 10.0, 10.0);
 
+	//Terragen
+	graphic = new Graphic();
+	graphic->generate(1024);
+
 	cout << "Finished initialization!" << endl;
 }
 
@@ -359,6 +374,9 @@ void ProjectEquinox::updateScene(int timeDelta){
 		lblFps->setText("FPS: " + std::to_string(fps));
 		lastFpsUpdate %= fpsUpdateDelay;
 	}
+
+	//Terragen
+	graphic->update(timeDelta);
 }
 
 void ProjectEquinox::updateView(){
@@ -398,11 +416,14 @@ void ProjectEquinox::renderScene(){
 
 	glPopMatrix();
 
+	graphic->draw();
+
 	lblFps->draw();
 
 	updateView();
 
-	glutSwapBuffers();
+	if(glutGetWindow() != 0)
+		glutSwapBuffers();
 
 
 	//glUseProgram(0);
@@ -412,9 +433,9 @@ void ProjectEquinox::renderScene(){
 }
 
 int main(int argc, char** argv){
-	ProjectEquinox* q = ProjectEquinox::getInstance();
-	q->initializeWindow(argc, argv);
-	q->release();
+	ProjectEquinox* program = ProjectEquinox::getInstance();
+	program->initializeWindow(argc, argv);
+	program->release();
 
 	return 0;
 }

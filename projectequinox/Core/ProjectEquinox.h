@@ -5,7 +5,7 @@
 #include <string>
 #include "../Graphics/Texture.h"
 #include "../UI/TextLabel.h"
-
+#include "../Terragen/Graphic.h"
 class ProjectEquinox{
 public:
 	static ProjectEquinox* getInstance();
@@ -71,6 +71,9 @@ private:
 	int lastFpsUpdate;
 	int fpsUpdateDelay;
 	TextLabel* lblFps;
+
+	//Terragen
+	Graphic* graphic;
 };
 
 #endif
