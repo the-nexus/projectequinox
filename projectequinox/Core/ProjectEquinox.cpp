@@ -33,6 +33,8 @@ ProjectEquinox::ProjectEquinox(){
 
 	lastFpsUpdate = 0;
 	fpsUpdateDelay = 100;
+
+	wireframeMode = false;
 }
 
 ProjectEquinox::~ProjectEquinox() {
@@ -43,6 +45,14 @@ ProjectEquinox* ProjectEquinox::getInstance(){
 	if (instance == nullptr)
 		instance = new ProjectEquinox();
 	return instance;
+}
+
+string ProjectEquinox::fixDecimalText(string text, int decimalCount) {
+	int dotPos = text.find(".");
+	if (dotPos != string::npos && text.length() > dotPos + decimalCount + 1)
+		return text.substr(0, dotPos + decimalCount + 1);
+	else
+		return text;
 }
 
 void ProjectEquinox::initializeWindow(int argc, char** argv){
@@ -89,16 +99,8 @@ void ProjectEquinox::initializeWindow(int argc, char** argv){
 }
 
 void ProjectEquinox::release(){
-	delete graphic;
+	delete planet;
 	cout << "Application terminated" << endl;
-	cout << "Enter a seed: ";
-	int seed;
-	cin >> seed;
-
-	srand(seed);
-	for (int i = 0; i < 10; i++)
-		cout << (i + 1) << ":\t"<< rand() << endl;
-	cin >> seed;
 }
 
 void ProjectEquinox::refreshWindow(){
@@ -308,18 +310,37 @@ void ProjectEquinox::processKey(unsigned char key, bool isDown){
 		keys[0] = isDown;
 		break;
 	case 'a':
-		keys[1] = isDown;
 		break;
 	case 's':
 		keys[2] = isDown;
 		break;
 	case 'd':
-		keys[3] = isDown;
 		break;
 	case 'r':
 		camPitch = 45.0;
 		camYaw = 45.0;
 		camZoom = 1.0;
+		break;
+	case 'g':
+		if (!isDown) {
+			int seed;
+			cout << "Enter a seed: ";
+			cin >> seed;
+			int res;
+			cout << "Enter a resolution: ";
+			cin >> res;
+			planet->generate(seed, res);
+		}
+		break;
+	case ' ':
+		if (!isDown) {
+			wireframeMode = !wireframeMode;
+			lblWireframeVal->setText(std::to_string(wireframeMode));
+		}
+		break;
+	case 'v':
+		if(!isDown)
+			shader = loadShaders("../bin/res/shaders/shader.vert", "../bin/res/shaders/shader.frag");
 		break;
 	}
 }
@@ -339,44 +360,53 @@ void ProjectEquinox::initialize(){
 	camYaw = 45;
 	camZoom = 1.0;
 
-	//UI
-	lblFps = new TextLabel(FontManager::getInstance()->getFont(0), 16.0, "FPS: XX", 10.0, 10.0);
-
 	//Terragen
-	graphic = new Graphic();
-	graphic->generate(1024);
+	planet = new Planet();
+	planet->generate(0, 256);
+
+	//UI
+	lblFps = new TextLabel(FontManager::getInstance()->getFont(0), 16.0, "FPS: ", 10.0, 10.0);
+	lblWireframe = new TextLabel(FontManager::getInstance()->getFont(0), lblFps->getSize(), "Wireframe Mode: ", lblFps->getX(), lblFps->getY() + lblFps->getSize() + 10.0);
+	lblHeightmap = new TextLabel(FontManager::getInstance()->getFont(0), lblFps->getSize(), "Terrain Height: ", lblFps->getX(), lblWireframe->getY() + lblWireframe->getSize() + 10.0);
+
+	lblFpsVal = new TextLabel(FontManager::getInstance()->getFont(0), lblFps->getSize(), "", lblFps->getWidth(), lblFps->getY());
+	lblWireframeVal = new TextLabel(FontManager::getInstance()->getFont(0), lblWireframe->getSize(), std::to_string(wireframeMode), lblWireframe->getWidth(), lblWireframe->getY());
+	lblHeightmapVal = new TextLabel(FontManager::getInstance()->getFont(0), lblHeightmap->getSize(), fixDecimalText(std::to_string(planet->getHeight()), 2), lblHeightmap->getWidth(), lblHeightmap->getY());
 
 	cout << "Finished initialization!" << endl;
 }
 
 void ProjectEquinox::updateScene(int timeDelta){
-	if (keys[0]){
-		posY += speed * timeDelta;
-	}
-
-	if (keys[1]){
-		posX -= speed * timeDelta;
-	}
-
-	if (keys[2]){
-		posY -= speed * timeDelta;
-	}
-
-	if (keys[3]){
-		posX += speed * timeDelta;
-	}
 
 	//UI
 	lblFps->update(timeDelta);
+	lblFpsVal->update(timeDelta);
 	lastFpsUpdate += timeDelta;
 	if (lastFpsUpdate > fpsUpdateDelay) {
-		int fps = 1000 / timeDelta;
-		lblFps->setText("FPS: " + std::to_string(fps));
+		double fps = 1000.0 / (double)timeDelta;
+		string fpsText = std::to_string(fps);
+		lblFpsVal->setText(fixDecimalText(fpsText, 2));
 		lastFpsUpdate %= fpsUpdateDelay;
 	}
+	lblWireframe->update(timeDelta);
+	lblWireframeVal->update(timeDelta);
+	lblHeightmap->update(timeDelta);
+	lblHeightmapVal->update(timeDelta);
+	if (keys[0]) {
+		double heightVal = planet->getHeight() + 1.0;
+		planet->setHeight(heightVal);
+		string heightmapText = std::to_string(heightVal);
+		lblHeightmapVal->setText(fixDecimalText(heightmapText, 2));
+	}
 
+	if (keys[2]) {
+		double heightVal = planet->getHeight() - 1.0;
+		planet->setHeight(heightVal);
+		string heightmapText = std::to_string(heightVal);
+		lblHeightmapVal->setText(fixDecimalText(heightmapText, 2));
+	}
 	//Terragen
-	graphic->update(timeDelta);
+	planet->update(timeDelta);
 }
 
 void ProjectEquinox::updateView(){
@@ -392,7 +422,9 @@ void ProjectEquinox::renderScene(){
 	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 	
-	//glUseProgram(shader);
+	glUseProgram(shader);
+
+	glUniform1i(glGetUniformLocation(shader, "useTex"), 0);
 
 	glPushMatrix();
 
@@ -414,19 +446,35 @@ void ProjectEquinox::renderScene(){
 	}
 	glEnd();
 
+	if(wireframeMode)
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	glUniform1i(glGetUniformLocation(shader, "useTex"), 1);
+	glUniform1i(glGetUniformLocation(shader, "heightmap"), 0);
+	glUniform1f(glGetUniformLocation(shader, "height"), planet->getHeight());
+	glActiveTexture(GL_TEXTURE0);
+	planet->getHeightmap()->bind();
+	planet->draw();
+
+	glUniform1i(glGetUniformLocation(shader, "useTex"), 0);
+
+	glUseProgram(0);
+
 	glPopMatrix();
 
-	graphic->draw();
-
+	//UI
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	lblFps->draw();
+	lblFpsVal->draw();
+	lblWireframe->draw();
+	lblWireframeVal->draw();
+	lblHeightmap->draw();
+	lblHeightmapVal->draw();
 
 	updateView();
 
 	if(glutGetWindow() != 0)
 		glutSwapBuffers();
-
-
-	//glUseProgram(0);
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);

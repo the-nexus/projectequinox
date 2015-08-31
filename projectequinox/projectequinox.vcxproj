@@ -27,9 +27,8 @@
     <ClCompile Include="IO\FontManager.cpp" />
     <ClCompile Include="IO\IOManager.cpp" />
     <ClCompile Include="Libs\picopng.cpp" />
-    <ClCompile Include="Terragen\Graphic.cpp" />
     <ClCompile Include="Terragen\PerlinNoise.cpp" />
-    <ClCompile Include="Terragen\Terrain.cpp" />
+    <ClCompile Include="Terragen\Planet.cpp" />
     <ClCompile Include="UI\TextLabel.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -41,9 +40,8 @@
     <ClInclude Include="IO\FontManager.h" />
     <ClInclude Include="IO\IOManager.h" />
     <ClInclude Include="Libs\picopng.h" />
-    <ClInclude Include="Terragen\Graphic.h" />
     <ClInclude Include="Terragen\PerlinNoise.h" />
-    <ClInclude Include="Terragen\Terrain.h" />
+    <ClInclude Include="Terragen\Planet.h" />
     <ClInclude Include="UI\TextLabel.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

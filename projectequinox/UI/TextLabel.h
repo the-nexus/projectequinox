@@ -12,6 +12,8 @@ public:
 	~TextLabel();
 	double getSize();
 	double getWidth();
+	double getX();
+	double getY();
 	void setText(std::string text);
 	void setPosition(double x, double y);
 	void setFont(Font* font);

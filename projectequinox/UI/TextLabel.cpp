@@ -39,6 +39,14 @@ double TextLabel::getWidth() {
 	return size*text.size();
 }
 
+double TextLabel::getX() {
+	return x;
+}
+
+double TextLabel::getY() {
+	return y;
+}
+
 void TextLabel::setText(std::string text) {
 	this->text = text;
 }
