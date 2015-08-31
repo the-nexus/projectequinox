@@ -81,10 +81,7 @@
     <ClCompile Include="Terragen\PerlinNoise.cpp">
       <Filter>Source Files\Terragen</Filter>
     </ClCompile>
-    <ClCompile Include="Terragen\Terrain.cpp">
-      <Filter>Source Files\Terragen</Filter>
-    </ClCompile>
-    <ClCompile Include="Terragen\Graphic.cpp">
+    <ClCompile Include="Terragen\Planet.cpp">
       <Filter>Source Files\Terragen</Filter>
     </ClCompile>
   </ItemGroup>
@@ -119,10 +116,7 @@
     <ClInclude Include="Terragen\PerlinNoise.h">
       <Filter>Header Files\Terragen</Filter>
     </ClInclude>
-    <ClInclude Include="Terragen\Terrain.h">
-      <Filter>Header Files\Terragen</Filter>
-    </ClInclude>
-    <ClInclude Include="Terragen\Graphic.h">
+    <ClInclude Include="Terragen\Planet.h">
       <Filter>Header Files\Terragen</Filter>
     </ClInclude>
   </ItemGroup>

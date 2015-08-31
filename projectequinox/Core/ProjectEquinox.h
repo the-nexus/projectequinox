@@ -5,7 +5,8 @@
 #include <string>
 #include "../Graphics/Texture.h"
 #include "../UI/TextLabel.h"
-#include "../Terragen/Graphic.h"
+#include "../Terragen/Planet.h"
+
 class ProjectEquinox{
 public:
 	static ProjectEquinox* getInstance();
@@ -32,6 +33,7 @@ public:
 
 	void setViewToOrtho();
 	void setViewToPerspective();
+	std::string fixDecimalText(std::string text, int decimalCount);
 
 private:
 	ProjectEquinox();
@@ -66,14 +68,24 @@ private:
 
 	//Graphics
 	int shader;
+	bool wireframeMode;
 
 	//FPS
 	int lastFpsUpdate;
 	int fpsUpdateDelay;
-	TextLabel* lblFps;
 
 	//Terragen
-	Graphic* graphic;
+	Planet* planet;
+
+	//UI
+	TextLabel* lblFps;
+	TextLabel* lblWireframe;
+	TextLabel* lblHeightmap;
+
+	TextLabel* lblFpsVal;
+	TextLabel* lblWireframeVal;
+	TextLabel* lblHeightmapVal;
+
 };
 
 #endif
