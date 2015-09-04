@@ -2,6 +2,9 @@
 #define TERRAIN_H
 
 #include "../Graphics/Texture.h"
+#include "../Geometry/Point.h"
+#include "../Geometry/Triangle.h"
+#include <vector>
 
 class Planet {
 public:
@@ -26,6 +29,9 @@ private:
 	double x;
 	double y;
 	double z;
+
+	std::vector<Point*> points;
+	std::vector<Triangle*> triangles;
 };
 
 #endif

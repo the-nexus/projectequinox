@@ -111,6 +111,9 @@ void TextLabel::draw() {
 
 	glPopMatrix();
 
+	if (font != NULL)
+		font->getFontTex()->unbind();
+
 	glDisable(GL_BLEND);
 	glDisable(GL_TEXTURE_2D);
 	ProjectEquinox::getInstance()->setViewToPerspective();

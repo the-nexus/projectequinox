@@ -49,7 +49,7 @@ ProjectEquinox* ProjectEquinox::getInstance(){
 
 string ProjectEquinox::fixDecimalText(string text, int decimalCount) {
 	int dotPos = text.find(".");
-	if (dotPos != string::npos && text.length() > dotPos + decimalCount + 1)
+	if (dotPos != string::npos && text.length() > (unsigned int)(dotPos + decimalCount + 1))
 		return text.substr(0, dotPos + decimalCount + 1);
 	else
 		return text;
@@ -392,14 +392,14 @@ void ProjectEquinox::updateScene(int timeDelta){
 	lblWireframeVal->update(timeDelta);
 	lblHeightmap->update(timeDelta);
 	lblHeightmapVal->update(timeDelta);
-	if (keys[0]) {
+	if (false && keys[0]) {
 		double heightVal = planet->getHeight() + 1.0;
 		planet->setHeight(heightVal);
 		string heightmapText = std::to_string(heightVal);
 		lblHeightmapVal->setText(fixDecimalText(heightmapText, 2));
 	}
 
-	if (keys[2]) {
+	if (false && keys[2]) {
 		double heightVal = planet->getHeight() - 1.0;
 		planet->setHeight(heightVal);
 		string heightmapText = std::to_string(heightVal);
@@ -422,7 +422,7 @@ void ProjectEquinox::renderScene(){
 	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 	
-	glUseProgram(shader);
+	//glUseProgram(shader);
 
 	glUniform1i(glGetUniformLocation(shader, "useTex"), 0);
 
@@ -451,9 +451,9 @@ void ProjectEquinox::renderScene(){
 
 	glUniform1i(glGetUniformLocation(shader, "useTex"), 1);
 	glUniform1i(glGetUniformLocation(shader, "heightmap"), 0);
-	glUniform1f(glGetUniformLocation(shader, "height"), planet->getHeight());
+	glUniform1f(glGetUniformLocation(shader, "height"), (float)(planet->getHeight()));
 	glActiveTexture(GL_TEXTURE0);
-	planet->getHeightmap()->bind();
+	//planet->getHeightmap()->bind();
 	planet->draw();
 
 	glUniform1i(glGetUniformLocation(shader, "useTex"), 0);
@@ -468,8 +468,8 @@ void ProjectEquinox::renderScene(){
 	lblFpsVal->draw();
 	lblWireframe->draw();
 	lblWireframeVal->draw();
-	lblHeightmap->draw();
-	lblHeightmapVal->draw();
+	//lblHeightmap->draw();
+	//lblHeightmapVal->draw();
 
 	updateView();
 

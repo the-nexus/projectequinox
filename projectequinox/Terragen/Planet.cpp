@@ -3,6 +3,7 @@
 #include "Planet.h"
 #include "GL/glew.h"
 #include "PerlinNoise.h"
+#include "Planet.h"
 
 Planet::Planet() {
 	width = 100.0;
@@ -21,6 +22,8 @@ Planet::Planet() {
 			heightmapData[j][i] = 0.0;
 		}
 	}
+
+	points = std::vector<Point*>();
 }
 
 Planet::~Planet() {
@@ -31,7 +34,11 @@ Planet::~Planet() {
 }
 
 void Planet::generate(int seed, int res) {
-	for (int j = 0; j < heightmapRes; j++)
+	Point* p = new Point();
+	points.push_back(p);
+
+
+	/*for (int j = 0; j < heightmapRes; j++)
 		delete heightmapData[j];
 	delete heightmapData;
 	delete heightmap;
@@ -86,7 +93,7 @@ void Planet::generate(int seed, int res) {
 
 	//Create the texture
 	heightmap = new Texture();
-	heightmap->createFromBuffer(texData, width, height);
+	heightmap->createFromBuffer(texData, width, height);*/
 }
 
 void Planet::update(int timeDelta) {
@@ -97,11 +104,16 @@ void Planet::draw() {
 	glPushMatrix();
 
 
-	glTranslated(x, y, z);
+	//glTranslated(x, y, z);
 	//glScaled(width, height, length);
 	glColor4d(1.0, 1.0, 1.0, 1.0);
 
-	heightmap->bind();
+	points[0]->draw();
+	
+
+
+
+	/*heightmap->bind();
 
 	for (int j = 0; j < length-1; j++) {
 		glBegin(GL_TRIANGLE_STRIP);
@@ -129,7 +141,7 @@ void Planet::draw() {
 			}
 		}
 		glEnd();
-	}
+	}*/
 	
 
 	glPopMatrix();

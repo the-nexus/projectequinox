@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="Core\ProjectEquinox.cpp" />
     <ClCompile Include="Core\ResourceInitializer.cpp" />
+    <ClCompile Include="Geometry\Point.cpp" />
     <ClCompile Include="Graphics\Color.cpp" />
     <ClCompile Include="Graphics\Font.cpp" />
     <ClCompile Include="Graphics\Texture.cpp" />
@@ -34,6 +35,7 @@
   <ItemGroup>
     <ClInclude Include="Core\ProjectEquinox.h" />
     <ClInclude Include="Core\ResourceInitializer.h" />
+    <ClInclude Include="Geometry\Point.h" />
     <ClInclude Include="Graphics\Color.h" />
     <ClInclude Include="Graphics\Font.h" />
     <ClInclude Include="Graphics\Texture.h" />

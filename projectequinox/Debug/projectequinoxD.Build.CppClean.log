@@ -1,5 +1,7 @@
 c:\users\kpt11\documents\github\projectequinox\projectequinox\debug\vc140.pdb
 c:\users\kpt11\documents\github\projectequinox\projectequinox\debug\vc140.idb
+c:\users\kpt11\documents\github\projectequinox\projectequinox\debug\projectequinox.obj
+c:\users\kpt11\documents\github\projectequinox\projectequinox\debug\resourceinitializer.obj
 c:\users\kpt11\documents\github\projectequinox\projectequinox\debug\color.obj
 c:\users\kpt11\documents\github\projectequinox\projectequinox\debug\font.obj
 c:\users\kpt11\documents\github\projectequinox\projectequinox\debug\texture.obj
@@ -8,9 +10,9 @@ c:\users\kpt11\documents\github\projectequinox\projectequinox\debug\iomanager.ob
 c:\users\kpt11\documents\github\projectequinox\projectequinox\debug\picopng.obj
 c:\users\kpt11\documents\github\projectequinox\projectequinox\debug\perlinnoise.obj
 c:\users\kpt11\documents\github\projectequinox\projectequinox\debug\planet.obj
-c:\users\kpt11\documents\github\projectequinox\projectequinox\debug\projectequinox.obj
-c:\users\kpt11\documents\github\projectequinox\projectequinox\debug\resourceinitializer.obj
 c:\users\kpt11\documents\github\projectequinox\projectequinox\debug\textlabel.obj
+c:\users\kpt11\documents\github\projectequinox\projectequinox\debug\point.obj
+c:\users\kpt11\documents\github\projectequinox\projectequinox\debug\triangle.obj
 c:\users\kpt11\documents\github\projectequinox\bin\projectequinoxd.ilk
 c:\users\kpt11\documents\github\projectequinox\bin\projectequinoxd.exe
 c:\users\kpt11\documents\github\projectequinox\bin\projectequinoxd.pdb
