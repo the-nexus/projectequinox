@@ -1,102 +1,48 @@
 #include <iostream>		//For cout and NULL
-#include <vector>
 #include "Planet.h"
 #include "GL/glew.h"
 #include "PerlinNoise.h"
 #include "Planet.h"
 
 Planet::Planet() {
-	width = 100.0;
-	length = 100.0;
-	height = 0.0;
-	x = -width/2.0;
-	z = -length/2.0;
+	radius = 1.0;
+	x = 0.0;
+	z = 0.0;
 	y = 0.0;
 
-	heightmap = new Texture();
-	heightmapRes = 1;
-	heightmapData = new double*[heightmapRes];
-	for (int j = 0; j < heightmapRes; j++) {
-		heightmapData[j] = new double[heightmapRes];
-		for (int i = 0; i < heightmapRes; i++) {
-			heightmapData[j][i] = 0.0;
-		}
-	}
-
-	points = std::vector<Point*>();
+	cells = std::vector<Cell*>();
 }
 
 Planet::~Planet() {
-	for (int j = 0; j < heightmapRes; j++)
-		delete heightmapData[j];
-	delete heightmapData;
-	delete heightmap;
+	for (unsigned int i = 0; i < cells.size(); i++)
+		delete cells[i];
 }
 
 void Planet::generate(int seed, int res) {
-	Point* p = new Point();
-	points.push_back(p);
+	/*
+				*
+			   /g\				g: gamma
+			r /   \ r			t: theta
+			 /t   t\			r: radius
+			*-------*			q: edge length
+				q
+	*/
+
+	const double PI = 3.141593;
+
+	double gamma = 72.0 / 180.0 * PI;
+	double theta = 54.0 / 180.0 * PI;
+
+	double edgeLength = sin(gamma) / sin(theta);
+
+	std::vector<Point*> points = std::vector<Point*>();
 
 
-	/*for (int j = 0; j < heightmapRes; j++)
-		delete heightmapData[j];
-	delete heightmapData;
-	delete heightmap;
-	heightmap = new Texture();
-
-	//Size of the texture
-	int width = res;
-	int height = res;
-	heightmapRes = res;
-
-	//heightmap init
-	heightmapData = new double*[height];
-	for (int j = 0; j < height; j++)
-		heightmapData[j] = new double[width];
-
-
-
-	//Generate perlin noise
-	PerlinNoise* perlin = new PerlinNoise(seed);
-	int kk = 0;
-
-	for (int j = 0; j < height; j++) {
-		for (int i = 0; i < width; i++) {
-			double x = 10.0 * (double)i / (double)width;
-			double y = 10.0 * (double)j / (double)height;
-
-			double val = sin(x + 1.0/perlin->noise(x, y, 0.0));
-			heightmapData[j][i] = val;
-		}
-	}
-
-	delete perlin;
-	
-
-
-	//Create the texture buffer
-	std::vector<unsigned char> texData = std::vector<unsigned char>(width*height * 4);
-
-	for (int j = 0; j < height; j++) {
-		for (int i = 0; i < width; i++) {
-			int vecPos = (j*width + i) * 4;
-			unsigned char val = (unsigned char)(heightmapData[j][i] * 255);
-
-			texData[vecPos + 0] = val;
-			texData[vecPos + 1] = val;
-			texData[vecPos + 2] = val;
-			texData[vecPos + 3] = 255;
-		}
-	}
-
-
-
-	//Create the texture
-	heightmap = new Texture();
-	heightmap->createFromBuffer(texData, width, height);*/
 }
 
 void Planet::update(int timeDelta) {
+	for (unsigned int i = 0; i < cells.size(); i++)
+		cells[i]->update(timeDelta);
 }
 
 void Planet::draw() {
@@ -104,52 +50,15 @@ void Planet::draw() {
 	glPushMatrix();
 
 
-	//glTranslated(x, y, z);
-	//glScaled(width, height, length);
+	glTranslated(x, y, z);
+	glScaled(radius, radius, radius);
 	glColor4d(1.0, 1.0, 1.0, 1.0);
-
-	points[0]->draw();
 	
-
-
-
-	/*heightmap->bind();
-
-	for (int j = 0; j < length-1; j++) {
-		glBegin(GL_TRIANGLE_STRIP);
-		{
-			int heightmapJ1 = (int)(heightmapRes * j / length);
-			int heightmapJ2 = (int)(heightmapRes * (j + 1) / length);
-			bool flipped = false;
-			for (int i = 0; i < width; i++) {
-				int heightmapI = (int)(heightmapRes * i / width);
-				double heightTop = height * heightmapData[heightmapJ1][heightmapI];
-				double heightBot = height * heightmapData[heightmapJ2][heightmapI];
-
-				if (flipped) {
-					glTexCoord2d(i / width, (j + 1) / length);
-					glVertex3d((double)i, heightBot, (double)j + 1);
-					glTexCoord2d(i / width, j / length);
-					glVertex3d((double)i, heightTop, (double)j);
-				}
-				else {
-					glTexCoord2d(i / width, j / length);
-					glVertex3d((double)i, heightTop, (double)j);
-					glTexCoord2d(i / width, (j + 1) / length);
-					glVertex3d((double)i, heightBot, (double)j + 1);
-				}
-			}
-		}
-		glEnd();
-	}*/
-	
+	for (unsigned int i = 0; i < cells.size(); i++)
+		cells[i]->draw();
 
 	glPopMatrix();
 	glDisable(GL_TEXTURE_2D);
-}
-
-Texture* Planet::getHeightmap() {
-	return heightmap;
 }
 
 double Planet::getHeight() {
@@ -158,4 +67,94 @@ double Planet::getHeight() {
 
 void Planet::setHeight(double height) {
 	this->height = height;
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//		CELLS
+//////////////////////////////////////////////////////////////////////////////////////////
+
+Planet::Cell::Cell() {
+	subcells = std::vector<Cell*>();
+	points = std::vector<Point*>();
+	points.push_back(new Point());
+	points.push_back(new Point());
+	points.push_back(new Point());
+	this->subdivided = false;
+	this->parentCell = NULL;
+}
+Planet::Cell::Cell(Cell* parentCell) {
+	subcells = std::vector<Cell*>();
+	points = std::vector<Point*>();
+	points.push_back(new Point());
+	points.push_back(new Point());
+	points.push_back(new Point());
+	this->subdivided = false;
+	this->parentCell = parentCell;
+}
+Planet::Cell::Cell(Point* p1, Point* p2, Point* p3, Cell*) {
+	points = std::vector<Point*>();
+	points.push_back(p1);
+	points.push_back(p2);
+	points.push_back(p3);
+	this->subdivided = false;
+	this->parentCell = parentCell;
+}
+Planet::Cell::~Cell() {
+	for (unsigned int i = 0; i < subcells.size(); i++)
+		delete subcells[i];
+	for (unsigned int i = 0; i < points.size(); i++)
+		delete points[i];
+}
+
+// GETTERS
+
+Point* Planet::Cell::getPoint(int n) {
+	return points[n];
+}
+Planet::Cell* Planet::Cell::getSubcell(int n) {
+	return subcells[n];
+}
+Planet::Cell* Planet::Cell::getParentCell() {
+	return parentCell;
+}
+bool Planet::Cell::isSubdivided() {
+	return subdivided;
+}
+bool Planet::Cell::hasParentCell() {
+	return (parentCell != NULL);
+}
+
+// SETTERS
+
+void Planet::Cell::setPoint(int n, Point* p) {
+	delete points[n];
+	points[n] = p;
+}
+
+// OTHERS
+
+void Planet::Cell::subdivide() {
+
+}
+void Planet::Cell::update(int timeDelta) {
+	if (subdivided) {
+		for (unsigned int i = 0; i < subcells.size(); i++)
+			subcells[i]->update(timeDelta);
+	}
+	else {
+		for (unsigned int i = 0; i < points.size(); i++)
+			points[i]->update(timeDelta);
+	}
+}
+void Planet::Cell::draw() {
+	if (subdivided) {
+		for (unsigned int i = 0; i < subcells.size(); i++)
+			subcells[i]->draw();
+	}
+	else {
+		for (unsigned int i = 0; i < points.size(); i++)
+			points[i]->draw();
+	}
 }

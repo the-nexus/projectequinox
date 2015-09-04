@@ -1,9 +1,7 @@
-#ifndef TERRAIN_H
-#define TERRAIN_H
+#ifndef PLANET_H
+#define PLANET_H
 
-#include "../Graphics/Texture.h"
 #include "../Geometry/Point.h"
-#include "../Geometry/Triangle.h"
 #include <vector>
 
 class Planet {
@@ -13,25 +11,41 @@ public:
 	void generate(int seed, int res);
 	void draw();
 	void update(int timeDelta);
-	Texture* getHeightmap();
 	double getHeight();
 	void setHeight(double height);
 private:
-	int seed;
-	Texture* heightmap;
-	double** heightmapData;
-	int heightmapRes;
+	class Cell {
+	public:
+		Cell();
+		Cell(Cell* parentCell);
+		Cell(Point* p1, Point* p2, Point* p3, Cell* parentCell);
+		~Cell();
+		Cell* getSubcell(int n);
+		Point* getPoint(int n);
+		bool isSubdivided();
+		bool hasParentCell();
+		Cell* getParentCell();
+		void setPoint(int n, Point* p);
+		void subdivide();
+		void update(int timeDelta);
+		void draw();
+	private:
+		bool subdivided;
+		std::vector<Cell*> subcells;
+		std::vector<Point*> points;
+		Cell* parentCell;
+	};
 
-	double width;
+
+	int seed;
+	double radius;
 	double height;
-	double length;
 
 	double x;
 	double y;
 	double z;
 
-	std::vector<Point*> points;
-	std::vector<Triangle*> triangles;
+	std::vector<Cell*> cells;
 };
 
 #endif
