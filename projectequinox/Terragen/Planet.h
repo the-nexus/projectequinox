@@ -10,7 +10,7 @@ public:
 	Planet();
 	~Planet();
 	void generate(int seed, int res);
-	void draw();
+	int draw();
 	void update(int timeDelta);
 	double getHeight();
 	void setHeight(double height);
@@ -32,7 +32,7 @@ private:
 		void subdivide();
 		void unsubdivide();
 		void update(int timeDelta);
-		void draw();
+		int draw();
 	private:
 		bool subdivided;
 		std::vector<Cell*> subcells;
@@ -48,6 +48,9 @@ private:
 	double x;
 	double y;
 	double z;
+
+	double yawSpeed;
+	double yaw;
 
 	std::vector<Cell*> cells;
 };
