@@ -50,8 +50,6 @@ private:
 
 	//Execution
 	bool isRunning;
-	double posX, posY;
-	double speed;
 
 	//Inputs
 	bool* keys;
@@ -65,6 +63,7 @@ private:
 	double camYaw;
 	double camPitch;
 	double camZoom;
+	double camX, camY, camZ;
 
 	//Graphics
 	int shader;
@@ -80,11 +79,11 @@ private:
 	//UI
 	TextLabel* lblFps;
 	TextLabel* lblWireframe;
-	TextLabel* lblHeightmap;
+	TextLabel* lblPolyDrawn;
 
 	TextLabel* lblFpsVal;
 	TextLabel* lblWireframeVal;
-	TextLabel* lblHeightmapVal;
+	TextLabel* lblPolyDrawnVal;
 
 };
 

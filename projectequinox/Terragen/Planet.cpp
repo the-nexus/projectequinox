@@ -10,6 +10,9 @@ Planet::Planet() {
 	z = 0.0;
 	y = 0.0;
 
+	yaw = 0.0;
+	yawSpeed = 0.01;
+
 	cells = std::vector<Cell*>();
 }
 
@@ -84,29 +87,6 @@ void Planet::generate(int seed, int res) {
 	}
 }
 
-void Planet::update(int timeDelta) {
-	for (unsigned int i = 0; i < cells.size(); i++)
-		cells[i]->update(timeDelta);
-}
-
-void Planet::draw() {
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_CULL_FACE);
-	glPushMatrix();
-
-
-	glTranslated(x, y, z);
-	glScaled(radius, radius, radius);
-	glColor4d(1.0, 1.0, 1.0, 1.0);
-	
-	for (unsigned int i = 0; i < cells.size(); i++)
-		cells[i]->draw();
-
-	glPopMatrix();
-	glDisable(GL_CULL_FACE);
-	glDisable(GL_TEXTURE_2D);
-}
-
 double Planet::getHeight() {
 	return height;
 }
@@ -120,9 +100,51 @@ void Planet::subdivide() {
 	for (unsigned int i = 0; i < cells.size(); i++)
 		cells[i]->subdivide();
 }
+
 void Planet::unsubdivide() {
 	for (unsigned int i = 0; i < cells.size(); i++)
 		cells[i]->unsubdivide();
+}
+
+void Planet::update(int timeDelta) {
+	for (unsigned int i = 0; i < cells.size(); i++)
+		cells[i]->update(timeDelta);
+
+	yaw += yawSpeed * timeDelta;
+}
+
+int Planet::draw() {
+	int polyDrawn = 0;
+
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_CULL_FACE);
+	glPushMatrix();
+
+	GLfloat materialEmission[] = { 0.0, 0.0, 0.0, 1.0 };
+	GLfloat materialAmbient[] = { 0.15, 0.15, 0.15, 1.0 };
+	GLfloat materialDiffuse[] = { 1.0, 1.0, 1.0, 1.0 };
+	GLfloat materialSpecular[] = { 1.0, 1.0, 1.0, 1.0 };
+	GLfloat materialShininess[] = { 100.0 };
+
+	glMaterialfv(GL_FRONT, GL_EMISSION, materialEmission);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, materialDiffuse);
+	glMaterialfv(GL_FRONT, GL_AMBIENT, materialAmbient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecular);
+	glMaterialfv(GL_FRONT, GL_SHININESS, materialShininess);
+
+	glTranslated(x, y, z);
+	glRotated(yaw, 0.0, 1.0, 0.0);
+	glScaled(radius, radius, radius);
+	glColor4d(1.0, 1.0, 1.0, 1.0);
+
+	for (unsigned int i = 0; i < cells.size(); i++)
+		polyDrawn += cells[i]->draw();
+
+	glPopMatrix();
+	glDisable(GL_CULL_FACE);
+	glDisable(GL_TEXTURE_2D);
+
+	return polyDrawn;
 }
 
 
@@ -267,22 +289,27 @@ void Planet::Cell::update(int timeDelta) {
 			points[i]->update(timeDelta);
 	}
 }
-void Planet::Cell::draw() {
+int Planet::Cell::draw() {
+	int polyDrawn = 0;
+
 	if (subdivided) {
 		for (unsigned int i = 0; i < subcells.size(); i++)
-			subcells[i]->draw();
+			polyDrawn += subcells[i]->draw();
 	}
 	else {
-		//glColor4d(color->getRed(), color->getGreen(), color->getBlue(), color->getAlpha());
-		glColor4d(1.0, 1.0, 1.0, 1.0);
+		glColor4d(color->getRed(), color->getGreen(), color->getBlue(), color->getAlpha());
+		//glColor4d(1.0, 1.0, 1.0, 1.0);
 		glBegin(GL_TRIANGLES);
 		for (unsigned int i = 0; i < points.size(); i++) {
 			//points[i]->draw();
 			Point* p = points[i];
-			glVertex3d(p->getX(), p->getY(), p->getZ());
 			glNormal3d(p->getX(), p->getY(), p->getZ());
+			glVertex3d(p->getX(), p->getY(), p->getZ());
 		}
 		glEnd();
+		polyDrawn++;
 	}
+
+	return polyDrawn;
 }
 

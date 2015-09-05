@@ -21,9 +21,9 @@ ProjectEquinox::ProjectEquinox(){
 	lastRightClickY = 0;
 	rightMouseDown = false;
 
-	posX = 0.0;
-	posY = 0.0;
-	speed = 0.001;
+	camX = 0.0;
+	camY = 0.0;
+	camZ = 100.0;
 	shader = 0;
 	isRunning = false;
 	keys = new bool[4];
@@ -371,11 +371,11 @@ void ProjectEquinox::initialize(){
 	//UI
 	lblFps = new TextLabel(FontManager::getInstance()->getFont(0), 16.0, "FPS: ", 10.0, 10.0);
 	lblWireframe = new TextLabel(FontManager::getInstance()->getFont(0), lblFps->getSize(), "Wireframe Mode: ", lblFps->getX(), lblFps->getY() + lblFps->getSize() + 10.0);
-	lblHeightmap = new TextLabel(FontManager::getInstance()->getFont(0), lblFps->getSize(), "Terrain Height: ", lblFps->getX(), lblWireframe->getY() + lblWireframe->getSize() + 10.0);
+	lblPolyDrawn = new TextLabel(FontManager::getInstance()->getFont(0), lblFps->getSize(), "Poly count: ", lblFps->getX(), lblWireframe->getY() + lblWireframe->getSize() + 10.0);
 
 	lblFpsVal = new TextLabel(FontManager::getInstance()->getFont(0), lblFps->getSize(), "", lblFps->getWidth(), lblFps->getY());
 	lblWireframeVal = new TextLabel(FontManager::getInstance()->getFont(0), lblWireframe->getSize(), std::to_string(wireframeMode), lblWireframe->getWidth(), lblWireframe->getY());
-	lblHeightmapVal = new TextLabel(FontManager::getInstance()->getFont(0), lblHeightmap->getSize(), fixDecimalText(std::to_string(planet->getHeight()), 2), lblHeightmap->getWidth(), lblHeightmap->getY());
+	lblPolyDrawnVal = new TextLabel(FontManager::getInstance()->getFont(0), lblPolyDrawn->getSize(), fixDecimalText(std::to_string(planet->getHeight()), 2), lblPolyDrawn->getWidth(), lblPolyDrawn->getY());
 
 	cout << "Finished initialization!" << endl;
 }
@@ -394,21 +394,9 @@ void ProjectEquinox::updateScene(int timeDelta){
 	}
 	lblWireframe->update(timeDelta);
 	lblWireframeVal->update(timeDelta);
-	lblHeightmap->update(timeDelta);
-	lblHeightmapVal->update(timeDelta);
-	if (false && keys[0]) {
-		double heightVal = planet->getHeight() + 1.0;
-		planet->setHeight(heightVal);
-		string heightmapText = std::to_string(heightVal);
-		lblHeightmapVal->setText(fixDecimalText(heightmapText, 2));
-	}
+	lblPolyDrawn->update(timeDelta);
+	lblPolyDrawnVal->update(timeDelta);
 
-	if (false && keys[2]) {
-		double heightVal = planet->getHeight() - 1.0;
-		planet->setHeight(heightVal);
-		string heightmapText = std::to_string(heightVal);
-		lblHeightmapVal->setText(fixDecimalText(heightmapText, 2));
-	}
 	//Terragen
 	planet->update(timeDelta);
 }
@@ -421,18 +409,15 @@ void ProjectEquinox::updateView(){
 }
 
 void ProjectEquinox::renderScene(){
+	int polyCount = 0;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
-	
-	glUseProgram(shader);
-
-	glUniform1i(glGetUniformLocation(shader, "useTex"), 0);
-
-	glPushMatrix();
 
 	glColor3d(1.0, 1.0, 1.0);
+
+	glPushMatrix();
 
 	glBegin(GL_LINES);
 	{
@@ -449,6 +434,15 @@ void ProjectEquinox::renderScene(){
 		glVertex3d(0.0, 0.0, 100.0);
 	}
 	glEnd();
+	
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	GLfloat lightpos[] = {camX, camY, camZ, 0.0};
+	glLightfv(GL_LIGHT0, GL_POSITION, lightpos);
+
+	glUseProgram(shader);
+
+	glUniform1i(glGetUniformLocation(shader, "useTex"), 0);
 
 	if(wireframeMode)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -458,7 +452,7 @@ void ProjectEquinox::renderScene(){
 	glUniform1f(glGetUniformLocation(shader, "height"), (float)(planet->getHeight()));
 	glActiveTexture(GL_TEXTURE0);
 	//planet->getHeightmap()->bind();
-	planet->draw();
+	polyCount += planet->draw();
 
 	glUniform1i(glGetUniformLocation(shader, "useTex"), 0);
 
@@ -466,14 +460,19 @@ void ProjectEquinox::renderScene(){
 
 	glPopMatrix();
 
+
+	glDisable(GL_LIGHT0);
+	glDisable(GL_LIGHTING);
+
 	//UI
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	lblFps->draw();
 	lblFpsVal->draw();
 	lblWireframe->draw();
 	lblWireframeVal->draw();
-	//lblHeightmap->draw();
-	//lblHeightmapVal->draw();
+	lblPolyDrawn->draw();
+	lblPolyDrawnVal->setText("" + to_string(polyCount));
+	lblPolyDrawnVal->draw();
 
 	updateView();
 
