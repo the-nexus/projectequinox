@@ -297,10 +297,10 @@ void ProjectEquinox::processMouseMovement(int x, int y){
 		else if (camYaw < 0.0)
 			camYaw += 360.0;
 
-		if (camPitch >= 90)
+		if (camPitch > 90)
 			camPitch = 90.0;
-		else if (camPitch <= 0.0)
-			camPitch = 0.0;
+		else if (camPitch < -90.0)
+			camPitch = -90.0;
 	}
 }
 
@@ -310,11 +310,15 @@ void ProjectEquinox::processKey(unsigned char key, bool isDown){
 		keys[0] = isDown;
 		break;
 	case 'a':
+		if (isDown)
+			planet->subdivide();
 		break;
 	case 's':
 		keys[2] = isDown;
 		break;
 	case 'd':
+		if (isDown)
+			planet->unsubdivide();
 		break;
 	case 'r':
 		camPitch = 45.0;

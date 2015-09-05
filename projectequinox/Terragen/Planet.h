@@ -2,6 +2,7 @@
 #define PLANET_H
 
 #include "../Geometry/Point.h"
+#include "../Graphics/Color.h"
 #include <vector>
 
 class Planet {
@@ -13,6 +14,8 @@ public:
 	void update(int timeDelta);
 	double getHeight();
 	void setHeight(double height);
+	void subdivide();
+	void unsubdivide();
 private:
 	class Cell {
 	public:
@@ -27,6 +30,7 @@ private:
 		Cell* getParentCell();
 		void setPoint(int n, Point* p);
 		void subdivide();
+		void unsubdivide();
 		void update(int timeDelta);
 		void draw();
 	private:
@@ -34,8 +38,8 @@ private:
 		std::vector<Cell*> subcells;
 		std::vector<Point*> points;
 		Cell* parentCell;
+		Color* color;
 	};
-
 
 	int seed;
 	double radius;

@@ -21,7 +21,9 @@ public:
 	bool equals(const Point* p) const;
 	void update(int timeDelta);
 	void draw();
+	void normalize();
 private:
+
 	double x;
 	double y;
 	double z;

@@ -103,3 +103,13 @@ void Point::draw() {
 	glEnd();
 	glPopMatrix();
 }
+
+void Point::normalize() {
+	//Get the length
+	double len = sqrt(pow(x, 2.0) + pow(y, 2.0) + pow(z, 2.0));
+
+	//Normalize coordinates
+	x = x / len;
+	y = y / len;
+	z = z / len;
+}
