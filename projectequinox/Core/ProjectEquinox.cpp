@@ -426,7 +426,7 @@ void ProjectEquinox::renderScene(){
 	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 	
-	//glUseProgram(shader);
+	glUseProgram(shader);
 
 	glUniform1i(glGetUniformLocation(shader, "useTex"), 0);
 

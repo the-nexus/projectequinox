@@ -63,13 +63,20 @@ void Planet::generate(int seed, int res) {
 			p2 = points[(face * 2 + 1) % 10 + 1];
 		}
 		else if (face < 15) {
-			p1 = points[((face - 5) % 10) + 1];
-			p3 = points[((face - 5 + 1) % 10) + 1];
-			p2 = points[((face - 5 + 2) % 10) + 1];
+			if (face % 2 == 0) {
+				p1 = points[((face - 5) % 10) + 1];
+				p2 = points[((face - 5 + 1) % 10) + 1];
+				p3 = points[((face - 5 + 2) % 10) + 1];
+			}
+			else {
+				p1 = points[((face - 5) % 10) + 1];
+				p3 = points[((face - 5 + 1) % 10) + 1];
+				p2 = points[((face - 5 + 2) % 10) + 1];
+			}
 		}
 		else {
-			p1 = points[11];
-			p2 = points[(face * 2 + 1) % 10];
+			p1 = points[(face * 2 + 1) % 10];
+			p2 = points[11];
 			p3 = points[((face + 1) * 2 + 1) % 10];
 		}
 
@@ -84,6 +91,7 @@ void Planet::update(int timeDelta) {
 
 void Planet::draw() {
 	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_CULL_FACE);
 	glPushMatrix();
 
 
@@ -95,6 +103,7 @@ void Planet::draw() {
 		cells[i]->draw();
 
 	glPopMatrix();
+	glDisable(GL_CULL_FACE);
 	glDisable(GL_TEXTURE_2D);
 }
 
@@ -271,6 +280,7 @@ void Planet::Cell::draw() {
 			//points[i]->draw();
 			Point* p = points[i];
 			glVertex3d(p->getX(), p->getY(), p->getZ());
+			glNormal3d(p->getX(), p->getY(), p->getZ());
 		}
 		glEnd();
 	}
