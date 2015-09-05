@@ -8,6 +8,7 @@ varying vec4 position;
 void main()
 {
 	vec4 col = color;
+	/*
 	if(position.y > 0.0){
 		col = vec4(0.45, 0.65, 0.1, 1.0);
 	}
@@ -21,5 +22,6 @@ void main()
 	if(useTex == 1){
 		col = col * texture2D(heightmap, gl_TexCoord[0].st);
 	}
+	*/
     gl_FragColor = col;
 }
