@@ -33,6 +33,10 @@ void PerlinNoise::initialize(int seed) {
 	permutation.insert(permutation.end(), permutation.begin(), permutation.end());
 }
 
+int PerlinNoise::getSeed() {
+	return seed;
+}
+
 double PerlinNoise::noise(double x, double y, double z) {
 	//Find the unit cube that contains the point
 	int X = (int)floor(x) & 255;

@@ -16,14 +16,15 @@ ProjectEquinox::ProjectEquinox(){
 	height = 720;
 	camYaw = 0.0;
 	camPitch = 0.0;
+	camDir = vector<double>();
+	camDir.push_back(0.0);
+	camDir.push_back(0.0);
+	camDir.push_back(1.0);
 
 	lastRightClickX = 0;
 	lastRightClickY = 0;
 	rightMouseDown = false;
 
-	camX = 0.0;
-	camY = 0.0;
-	camZ = 100.0;
 	shader = 0;
 	isRunning = false;
 	keys = new bool[4];
@@ -33,6 +34,11 @@ ProjectEquinox::ProjectEquinox(){
 
 	lastFpsUpdate = 0;
 	fpsUpdateDelay = 100;
+
+	lightPosition = vector<double>();
+	lightPosition.push_back(0.0);
+	lightPosition.push_back(0.0);
+	lightPosition.push_back(100.0);
 
 	wireframeMode = false;
 }
@@ -301,6 +307,13 @@ void ProjectEquinox::processMouseMovement(int x, int y){
 			camPitch = 90.0;
 		else if (camPitch < -90.0)
 			camPitch = -90.0;
+
+		double camPitchRad = camPitch / 180.0 * PI;
+		double camYawRad = camYaw / 180.0 * PI;
+
+		camDir[2] = sin(camPitchRad);
+		camDir[0] = cos(camPitchRad) * sin(camYawRad);
+		camDir[1] = cos(camPitchRad) * sin(camYawRad);
 	}
 }
 
@@ -435,9 +448,9 @@ void ProjectEquinox::renderScene(){
 	}
 	glEnd();
 	
-	glEnable(GL_LIGHTING);
+	//glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
-	GLfloat lightpos[] = {camX, camY, camZ, 0.0};
+	GLfloat lightpos[] = {(float)lightPosition[0], (float)lightPosition[1], (float)lightPosition[2], (float)0.0};
 	glLightfv(GL_LIGHT0, GL_POSITION, lightpos);
 
 	glUseProgram(shader);
@@ -447,9 +460,8 @@ void ProjectEquinox::renderScene(){
 	if(wireframeMode)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	glUniform1i(glGetUniformLocation(shader, "useTex"), 1);
-	glUniform1i(glGetUniformLocation(shader, "heightmap"), 0);
-	glUniform1f(glGetUniformLocation(shader, "height"), (float)(planet->getHeight()));
+	glUniform1f(glGetUniformLocation(shader, "planetRadius"), (float)(planet->getRadius()));
+	glUniform1f(glGetUniformLocation(shader, "planetHeight"), (float)(planet->getHeight()));
 	glActiveTexture(GL_TEXTURE0);
 	//planet->getHeightmap()->bind();
 	polyCount += planet->draw();
@@ -462,7 +474,7 @@ void ProjectEquinox::renderScene(){
 
 
 	glDisable(GL_LIGHT0);
-	glDisable(GL_LIGHTING);
+	//glDisable(GL_LIGHTING);
 
 	//UI
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -481,6 +493,10 @@ void ProjectEquinox::renderScene(){
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
+}
+
+double ProjectEquinox::compareWithCamDir(std::vector<double> dir) {
+	return (dir[0] * camDir[0] + dir[1] * camDir[1] + dir[2] * camDir[2]) / (camDir[0] * camDir[0] + camDir[1] * camDir[1] + camDir[2] * camDir[2]);
 }
 
 int main(int argc, char** argv){
