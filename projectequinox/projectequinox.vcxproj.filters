@@ -49,6 +49,12 @@
     <Filter Include="Source Files\Terragen">
       <UniqueIdentifier>{b49183ff-f4bc-4383-aedd-9149bb14a344}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Geometry">
+      <UniqueIdentifier>{4f24a050-a0b8-4a16-a8b0-78814f2bbfae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Geometry">
+      <UniqueIdentifier>{94883ba6-283c-48ec-86c8-7358ebfcf4ef}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\ProjectEquinox.cpp">
@@ -84,6 +90,9 @@
     <ClCompile Include="Terragen\Planet.cpp">
       <Filter>Source Files\Terragen</Filter>
     </ClCompile>
+    <ClCompile Include="Geometry\Point.cpp">
+      <Filter>Source Files\Geometry</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\ProjectEquinox.h">
@@ -118,6 +127,9 @@
     </ClInclude>
     <ClInclude Include="Terragen\Planet.h">
       <Filter>Header Files\Terragen</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\Point.h">
+      <Filter>Header Files\Geometry</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

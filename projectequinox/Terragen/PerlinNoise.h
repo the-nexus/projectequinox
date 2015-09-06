@@ -9,6 +9,7 @@ public:
 	PerlinNoise(int seed);
 	~PerlinNoise();
 	double noise(double x, double y, double z);
+	int getSeed();
 private:
 	void initialize(int seed);
 	double fade(double val);

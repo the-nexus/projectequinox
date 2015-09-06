@@ -3,6 +3,7 @@
 #define PROJECT_EQUINOX_H
 
 #include <string>
+#include <vector>
 #include "../Graphics/Texture.h"
 #include "../UI/TextLabel.h"
 #include "../Terragen/Planet.h"
@@ -35,6 +36,8 @@ public:
 	void setViewToPerspective();
 	std::string fixDecimalText(std::string text, int decimalCount);
 
+	double compareWithCamDir(std::vector<double> dir);
+
 private:
 	ProjectEquinox();
 	~ProjectEquinox();
@@ -50,8 +53,6 @@ private:
 
 	//Execution
 	bool isRunning;
-	double posX, posY;
-	double speed;
 
 	//Inputs
 	bool* keys;
@@ -65,10 +66,12 @@ private:
 	double camYaw;
 	double camPitch;
 	double camZoom;
+	std::vector<double> camDir;
 
 	//Graphics
 	int shader;
 	bool wireframeMode;
+	std::vector<double> lightPosition;
 
 	//FPS
 	int lastFpsUpdate;
@@ -80,11 +83,11 @@ private:
 	//UI
 	TextLabel* lblFps;
 	TextLabel* lblWireframe;
-	TextLabel* lblHeightmap;
+	TextLabel* lblPolyDrawn;
 
 	TextLabel* lblFpsVal;
 	TextLabel* lblWireframeVal;
-	TextLabel* lblHeightmapVal;
+	TextLabel* lblPolyDrawnVal;
 
 };
 

@@ -16,14 +16,15 @@ ProjectEquinox::ProjectEquinox(){
 	height = 720;
 	camYaw = 0.0;
 	camPitch = 0.0;
+	camDir = vector<double>();
+	camDir.push_back(0.0);
+	camDir.push_back(0.0);
+	camDir.push_back(1.0);
 
 	lastRightClickX = 0;
 	lastRightClickY = 0;
 	rightMouseDown = false;
 
-	posX = 0.0;
-	posY = 0.0;
-	speed = 0.001;
 	shader = 0;
 	isRunning = false;
 	keys = new bool[4];
@@ -33,6 +34,11 @@ ProjectEquinox::ProjectEquinox(){
 
 	lastFpsUpdate = 0;
 	fpsUpdateDelay = 100;
+
+	lightPosition = vector<double>();
+	lightPosition.push_back(0.0);
+	lightPosition.push_back(0.0);
+	lightPosition.push_back(100.0);
 
 	wireframeMode = false;
 }
@@ -49,7 +55,7 @@ ProjectEquinox* ProjectEquinox::getInstance(){
 
 string ProjectEquinox::fixDecimalText(string text, int decimalCount) {
 	int dotPos = text.find(".");
-	if (dotPos != string::npos && text.length() > dotPos + decimalCount + 1)
+	if (dotPos != string::npos && text.length() > (unsigned int)(dotPos + decimalCount + 1))
 		return text.substr(0, dotPos + decimalCount + 1);
 	else
 		return text;
@@ -297,10 +303,17 @@ void ProjectEquinox::processMouseMovement(int x, int y){
 		else if (camYaw < 0.0)
 			camYaw += 360.0;
 
-		if (camPitch >= 90)
+		if (camPitch > 90)
 			camPitch = 90.0;
-		else if (camPitch <= 0.0)
-			camPitch = 0.0;
+		else if (camPitch < -90.0)
+			camPitch = -90.0;
+
+		double camPitchRad = camPitch / 180.0 * PI;
+		double camYawRad = camYaw / 180.0 * PI;
+
+		camDir[2] = sin(camPitchRad);
+		camDir[0] = cos(camPitchRad) * sin(camYawRad);
+		camDir[1] = cos(camPitchRad) * sin(camYawRad);
 	}
 }
 
@@ -310,11 +323,15 @@ void ProjectEquinox::processKey(unsigned char key, bool isDown){
 		keys[0] = isDown;
 		break;
 	case 'a':
+		if (isDown)
+			planet->subdivide();
 		break;
 	case 's':
 		keys[2] = isDown;
 		break;
 	case 'd':
+		if (isDown)
+			planet->unsubdivide();
 		break;
 	case 'r':
 		camPitch = 45.0;
@@ -367,11 +384,11 @@ void ProjectEquinox::initialize(){
 	//UI
 	lblFps = new TextLabel(FontManager::getInstance()->getFont(0), 16.0, "FPS: ", 10.0, 10.0);
 	lblWireframe = new TextLabel(FontManager::getInstance()->getFont(0), lblFps->getSize(), "Wireframe Mode: ", lblFps->getX(), lblFps->getY() + lblFps->getSize() + 10.0);
-	lblHeightmap = new TextLabel(FontManager::getInstance()->getFont(0), lblFps->getSize(), "Terrain Height: ", lblFps->getX(), lblWireframe->getY() + lblWireframe->getSize() + 10.0);
+	lblPolyDrawn = new TextLabel(FontManager::getInstance()->getFont(0), lblFps->getSize(), "Poly count: ", lblFps->getX(), lblWireframe->getY() + lblWireframe->getSize() + 10.0);
 
 	lblFpsVal = new TextLabel(FontManager::getInstance()->getFont(0), lblFps->getSize(), "", lblFps->getWidth(), lblFps->getY());
 	lblWireframeVal = new TextLabel(FontManager::getInstance()->getFont(0), lblWireframe->getSize(), std::to_string(wireframeMode), lblWireframe->getWidth(), lblWireframe->getY());
-	lblHeightmapVal = new TextLabel(FontManager::getInstance()->getFont(0), lblHeightmap->getSize(), fixDecimalText(std::to_string(planet->getHeight()), 2), lblHeightmap->getWidth(), lblHeightmap->getY());
+	lblPolyDrawnVal = new TextLabel(FontManager::getInstance()->getFont(0), lblPolyDrawn->getSize(), fixDecimalText(std::to_string(planet->getHeight()), 2), lblPolyDrawn->getWidth(), lblPolyDrawn->getY());
 
 	cout << "Finished initialization!" << endl;
 }
@@ -390,21 +407,9 @@ void ProjectEquinox::updateScene(int timeDelta){
 	}
 	lblWireframe->update(timeDelta);
 	lblWireframeVal->update(timeDelta);
-	lblHeightmap->update(timeDelta);
-	lblHeightmapVal->update(timeDelta);
-	if (keys[0]) {
-		double heightVal = planet->getHeight() + 1.0;
-		planet->setHeight(heightVal);
-		string heightmapText = std::to_string(heightVal);
-		lblHeightmapVal->setText(fixDecimalText(heightmapText, 2));
-	}
+	lblPolyDrawn->update(timeDelta);
+	lblPolyDrawnVal->update(timeDelta);
 
-	if (keys[2]) {
-		double heightVal = planet->getHeight() - 1.0;
-		planet->setHeight(heightVal);
-		string heightmapText = std::to_string(heightVal);
-		lblHeightmapVal->setText(fixDecimalText(heightmapText, 2));
-	}
 	//Terragen
 	planet->update(timeDelta);
 }
@@ -417,18 +422,15 @@ void ProjectEquinox::updateView(){
 }
 
 void ProjectEquinox::renderScene(){
+	int polyCount = 0;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
-	
-	glUseProgram(shader);
-
-	glUniform1i(glGetUniformLocation(shader, "useTex"), 0);
-
-	glPushMatrix();
 
 	glColor3d(1.0, 1.0, 1.0);
+
+	glPushMatrix();
 
 	glBegin(GL_LINES);
 	{
@@ -445,16 +447,24 @@ void ProjectEquinox::renderScene(){
 		glVertex3d(0.0, 0.0, 100.0);
 	}
 	glEnd();
+	
+	//glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	GLfloat lightpos[] = {(float)lightPosition[0], (float)lightPosition[1], (float)lightPosition[2], (float)0.0};
+	glLightfv(GL_LIGHT0, GL_POSITION, lightpos);
+
+	glUseProgram(shader);
+
+	glUniform1i(glGetUniformLocation(shader, "useTex"), 0);
 
 	if(wireframeMode)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	glUniform1i(glGetUniformLocation(shader, "useTex"), 1);
-	glUniform1i(glGetUniformLocation(shader, "heightmap"), 0);
-	glUniform1f(glGetUniformLocation(shader, "height"), planet->getHeight());
+	glUniform1f(glGetUniformLocation(shader, "planetRadius"), (float)(planet->getRadius()));
+	glUniform1f(glGetUniformLocation(shader, "planetHeight"), (float)(planet->getHeight()));
 	glActiveTexture(GL_TEXTURE0);
-	planet->getHeightmap()->bind();
-	planet->draw();
+	//planet->getHeightmap()->bind();
+	polyCount += planet->draw();
 
 	glUniform1i(glGetUniformLocation(shader, "useTex"), 0);
 
@@ -462,14 +472,19 @@ void ProjectEquinox::renderScene(){
 
 	glPopMatrix();
 
+
+	glDisable(GL_LIGHT0);
+	//glDisable(GL_LIGHTING);
+
 	//UI
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	lblFps->draw();
 	lblFpsVal->draw();
 	lblWireframe->draw();
 	lblWireframeVal->draw();
-	lblHeightmap->draw();
-	lblHeightmapVal->draw();
+	lblPolyDrawn->draw();
+	lblPolyDrawnVal->setText("" + to_string(polyCount));
+	lblPolyDrawnVal->draw();
 
 	updateView();
 
@@ -478,6 +493,10 @@ void ProjectEquinox::renderScene(){
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
+}
+
+double ProjectEquinox::compareWithCamDir(std::vector<double> dir) {
+	return (dir[0] * camDir[0] + dir[1] * camDir[1] + dir[2] * camDir[2]) / (camDir[0] * camDir[0] + camDir[1] * camDir[1] + camDir[2] * camDir[2]);
 }
 
 int main(int argc, char** argv){
