@@ -335,6 +335,20 @@ void Planet::Cell::forceUnsubdivide() {
 		subdivided = false;
 	}
 }
+
+double Planet::Cell::heightFunction(double x, double y, double z, double frequency, double amplitude, PerlinNoise* numberGenerator) {
+	double height = 0.0;
+
+	//Basic asteroid
+	height = sin(1.0 / numberGenerator->noise(x * frequency, y * frequency, z*frequency)) * amplitude;
+	//Test
+	height = ((x*0) + (y*0.9) + (z*0.1) + 0.1 * numberGenerator->noise(x * frequency, y * frequency, z * frequency));
+	height = abs(sin(height * 3.14159)) * amplitude;
+	//std::cout << height << std::endl;
+
+	return height;
+}
+
 void Planet::Cell::update(int timeDelta) {
 	if (subdivided) {
 		for (unsigned int i = 0; i < subcells.size(); i++)
@@ -388,7 +402,7 @@ double Planet::Cell::generateHeight(Point* p) {
 		double frequency = 2 ^ i;
 		double amplitude = pow(persistence, i);
 
-		height += sin(1.0/ng->noise(x * frequency, y * frequency, z*frequency)) * amplitude;	//ASTEROID
+		height += heightFunction(x, y, z, frequency, amplitude, ng);	//ASTEROID
 	}
 
 	double extraNoise = ng->noise(x, y, z) * 20;
