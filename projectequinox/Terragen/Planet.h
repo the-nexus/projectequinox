@@ -34,6 +34,7 @@ private:
 		void setPoint(int n, Point* p);
 		void forceSubdivide();
 		void forceUnsubdivide();
+		double heightFunction(double x, double y, double z, double frequency, double amplitude, PerlinNoise* numberGenerator);
 		void update(int timeDelta);
 		int draw();
 	private:

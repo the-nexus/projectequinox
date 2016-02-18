@@ -89,6 +89,8 @@ void ProjectEquinox::initializeWindow(int argc, char** argv){
 		//Keyboard input
 		glutKeyboardFunc(keyDownEvent);
 		glutKeyboardUpFunc(keyUpEvent);
+		glutSpecialFunc(specialKeyDownEvent);
+		glutSpecialUpFunc(specialKeyUpEvent);
 
 		//Initialize the entry points of the OpenGL Driver to be able to call all the functions in the API
 		GLenum err = glewInit();
@@ -128,6 +130,14 @@ void ProjectEquinox::keyDownEvent(unsigned char key, int x, int y){
 
 void ProjectEquinox::keyUpEvent(unsigned char key, int x, int y){
 	instance->processKey(key, false);
+}
+
+void ProjectEquinox::specialKeyDownEvent(int key, int x, int y) {
+	instance->processSpecialKey(key, true);
+}
+
+void ProjectEquinox::specialKeyUpEvent(int key, int x, int y) {
+	instance->processSpecialKey(key, false);
 }
 
 void ProjectEquinox::updateViewport(int width, int height){
@@ -320,18 +330,16 @@ void ProjectEquinox::processMouseMovement(int x, int y){
 void ProjectEquinox::processKey(unsigned char key, bool isDown){
 	switch (key){
 	case 'w':
-		keys[0] = isDown;
-		break;
-	case 'a':
-		if (isDown)
+		if (!isDown)
 			planet->subdivide();
 		break;
+	case 'a':
+		break;
 	case 's':
-		keys[2] = isDown;
+		if (!isDown)
+			planet->unsubdivide();
 		break;
 	case 'd':
-		if (isDown)
-			planet->unsubdivide();
 		break;
 	case 'r':
 		camPitch = 45.0;
@@ -339,7 +347,7 @@ void ProjectEquinox::processKey(unsigned char key, bool isDown){
 		camZoom = 1.0;
 		break;
 	case 'g':
-		if (!isDown) {
+		if (false /*!isDown*/ ) {
 			int seed;
 			cout << "Enter a seed: ";
 			cin >> seed;
@@ -356,8 +364,22 @@ void ProjectEquinox::processKey(unsigned char key, bool isDown){
 		}
 		break;
 	case 'v':
-		if(!isDown)
+		if(false /*!isDown*/)
 			shader = loadShaders("../bin/res/shaders/shader.vert", "../bin/res/shaders/shader.frag");
+		break;
+	default:
+		break;
+	}
+}
+
+void ProjectEquinox::processSpecialKey(int key, bool isDown) {
+	switch (key) {
+	case GLUT_KEY_F3:
+		if (!isDown) {
+			displayHelpKeyList = !displayHelpKeyList;
+		}
+		break;
+	default:
 		break;
 	}
 }
@@ -382,13 +404,39 @@ void ProjectEquinox::initialize(){
 	planet->generate(0, 256);
 
 	//UI
-	lblFps = new TextLabel(FontManager::getInstance()->getFont(0), 16.0, "FPS: ", 10.0, 10.0);
+	lblFps = new TextLabel(FontManager::getInstance()->getFont(0), 8.0, "FPS: ", 10.0, 10.0);
 	lblWireframe = new TextLabel(FontManager::getInstance()->getFont(0), lblFps->getSize(), "Wireframe Mode: ", lblFps->getX(), lblFps->getY() + lblFps->getSize() + 10.0);
 	lblPolyDrawn = new TextLabel(FontManager::getInstance()->getFont(0), lblFps->getSize(), "Poly count: ", lblFps->getX(), lblWireframe->getY() + lblWireframe->getSize() + 10.0);
 
 	lblFpsVal = new TextLabel(FontManager::getInstance()->getFont(0), lblFps->getSize(), "", lblFps->getWidth(), lblFps->getY());
 	lblWireframeVal = new TextLabel(FontManager::getInstance()->getFont(0), lblWireframe->getSize(), std::to_string(wireframeMode), lblWireframe->getWidth(), lblWireframe->getY());
 	lblPolyDrawnVal = new TextLabel(FontManager::getInstance()->getFont(0), lblPolyDrawn->getSize(), fixDecimalText(std::to_string(planet->getHeight()), 2), lblPolyDrawn->getWidth(), lblPolyDrawn->getY());
+
+	displayHelpKeyList = false;
+	double maxWidthLblHelp = 0.0;
+	lblHelpKeyList = new TextLabel(FontManager::getInstance()->getFont(0), lblFps->getSize(), "--- Keys --- (F3 to hide/show)", 0, 10);
+	maxWidthLblHelp = (maxWidthLblHelp < lblHelpKeyList->getWidth() ? lblHelpKeyList->getWidth() : maxWidthLblHelp);
+	lblHelpKeyW = new TextLabel(FontManager::getInstance()->getFont(0), lblFps->getSize(), "W : Increase terrain polygon count", 0, lblHelpKeyList->getY() + lblHelpKeyList->getSize() + 10.0);
+	maxWidthLblHelp = (maxWidthLblHelp < lblHelpKeyW->getWidth() ? lblHelpKeyW->getWidth() : maxWidthLblHelp);
+	lblHelpKeyS = new TextLabel(FontManager::getInstance()->getFont(0), lblFps->getSize(), "S : Decrease terrain polygon count", 0, lblHelpKeyW->getY() + lblHelpKeyW->getSize() + 10.0);
+	maxWidthLblHelp = (maxWidthLblHelp < lblHelpKeyS->getWidth() ? lblHelpKeyS->getWidth() : maxWidthLblHelp);
+	lblHelpKeyR = new TextLabel(FontManager::getInstance()->getFont(0), lblFps->getSize(), "R : Reset camera", 0, lblHelpKeyS->getY() + lblHelpKeyS->getSize() + 10.0);
+	maxWidthLblHelp = (maxWidthLblHelp < lblHelpKeyR->getWidth() ? lblHelpKeyR->getWidth() : maxWidthLblHelp);
+	lblHelpKeySpace = new TextLabel(FontManager::getInstance()->getFont(0), lblFps->getSize(), "Space : Toggle wireframe mode", 0, lblHelpKeyR->getY() + lblHelpKeyR->getSize() + 10.0);
+	maxWidthLblHelp = (maxWidthLblHelp < lblHelpKeySpace->getWidth() ? lblHelpKeySpace->getWidth() : maxWidthLblHelp);
+	lblHelpKeyMouseRight = new TextLabel(FontManager::getInstance()->getFont(0), lblFps->getSize(), "Mouse Right : Camera movement (orbit)", 0, lblHelpKeySpace->getY() + lblHelpKeySpace->getSize() + 10.0);
+	maxWidthLblHelp = (maxWidthLblHelp < lblHelpKeyMouseRight->getWidth() ? lblHelpKeyMouseRight->getWidth() : maxWidthLblHelp);
+	lblHelpKeyMouseWheel = new TextLabel(FontManager::getInstance()->getFont(0), lblFps->getSize(), "Mouse Wheel : Camera zoom (in/out)", 0, lblHelpKeyMouseRight->getY() + lblHelpKeyMouseRight->getSize() + 10.0);
+	maxWidthLblHelp = (maxWidthLblHelp < lblHelpKeyMouseWheel->getWidth() ? lblHelpKeyMouseWheel->getWidth() : maxWidthLblHelp);
+
+	double newXPosLblHelp = this->width - maxWidthLblHelp - 10.0;
+	lblHelpKeyList->setPosition(newXPosLblHelp, lblHelpKeyList->getY());
+	lblHelpKeyW->setPosition(newXPosLblHelp, lblHelpKeyW->getY());
+	lblHelpKeyS->setPosition(newXPosLblHelp, lblHelpKeyS->getY());
+	lblHelpKeyR->setPosition(newXPosLblHelp, lblHelpKeyR->getY());
+	lblHelpKeySpace->setPosition(newXPosLblHelp, lblHelpKeySpace->getY());
+	lblHelpKeyMouseRight->setPosition(newXPosLblHelp, lblHelpKeyMouseRight->getY());
+	lblHelpKeyMouseWheel->setPosition(newXPosLblHelp, lblHelpKeyMouseWheel->getY());
 
 	cout << "Finished initialization!" << endl;
 }
@@ -485,6 +533,16 @@ void ProjectEquinox::renderScene(){
 	lblPolyDrawn->draw();
 	lblPolyDrawnVal->setText("" + to_string(polyCount));
 	lblPolyDrawnVal->draw();
+
+	lblHelpKeyList->draw();
+	if (displayHelpKeyList) {
+		lblHelpKeyW->draw();
+		lblHelpKeyS->draw();
+		lblHelpKeyR->draw();
+		lblHelpKeySpace->draw();
+		lblHelpKeyMouseRight->draw();
+		lblHelpKeyMouseWheel->draw();
+	}
 
 	updateView();
 

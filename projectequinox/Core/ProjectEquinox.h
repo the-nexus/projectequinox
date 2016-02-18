@@ -18,6 +18,8 @@ public:
 	static void mouseMovementEvent(int x, int y);
 	static void keyDownEvent(unsigned char key, int x, int y);
 	static void keyUpEvent(unsigned char key, int x, int y);
+	static void specialKeyDownEvent(int key, int x, int y);
+	static void specialKeyUpEvent(int key, int x, int y);
 
 	void initializeWindow(int argc, char** argv);
 	void initialize();
@@ -29,6 +31,7 @@ public:
 	void processMouseClick(int button, int state, int x, int y);
 	void processMouseMovement(int x, int y);
 	void processKey(unsigned char key, bool isDown);
+	void processSpecialKey(int key, bool isDown);
 	int getDelay();
 	void release();
 
@@ -88,6 +91,15 @@ private:
 	TextLabel* lblFpsVal;
 	TextLabel* lblWireframeVal;
 	TextLabel* lblPolyDrawnVal;
+
+	bool displayHelpKeyList;
+	TextLabel* lblHelpKeyList;
+	TextLabel* lblHelpKeyW;
+	TextLabel* lblHelpKeyS;
+	TextLabel* lblHelpKeySpace;
+	TextLabel* lblHelpKeyR;
+	TextLabel* lblHelpKeyMouseRight;
+	TextLabel* lblHelpKeyMouseWheel;
 
 };
 
